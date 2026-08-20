@@ -29,6 +29,15 @@ foreach (array_keys($cfg['Servers'] ?? []) as $railwayServerId) {
 }
 unset($railwayServerId);
 
+/*
+ * phpMyAdmin's default AuthLog destination is syslog, which in a container with no
+ * syslog daemon discards every authentication event. `php` routes them through
+ * error_log(), i.e. Apache's ErrorLog, i.e. `railway logs` — so a public admin panel
+ * has an audit trail of who signed in, and from where, instead of none.
+ */
+$cfg['AuthLog'] = trim((string) getenv('PMA_AUTH_LOG')) ?: 'php';
+$cfg['AuthLogSuccess'] = true;
+
 /* Never offer to mail a stack trace out of someone else's deployment. */
 $cfg['SendErrorReports'] = 'never';
 
